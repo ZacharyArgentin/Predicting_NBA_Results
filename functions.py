@@ -9,10 +9,28 @@ def make_request(endpoint, params=None, record_path=None, verbose=False):
         print(response.status_code)
         return response
     if verbose: 
-        print("Success!")
-    res = response.json()
-    res = pd.json_normalize(res, record_path=record_path)
-    return res
+        print("Success!")  
+    df = pd.json_normalize(response.json(), record_path=record_path)
+   
+    # If the request ends up being a multi page request, get all the pages
+    # and then complile the results into one dataframe
+    n_pages = response.json()["meta"]["total_pages"] 
+    if n_pages > 1:
+        if isinstance(params, dict):
+            for page_num in range(2, n_pages + 1):
+                params.update({"page": page_num})
+                response = requests.get(root + endpoint, params=params)
+                page_n = pd.json_normalize(response.json(), record_path=record_path)
+                df = df.append(page_n)
+        if isinstance(params, list):
+            for page_num in range(2, n_pages + 1):
+                params.append(("page", page_num))
+                response = requests.get(root + endpoint, params=params)
+                page_n = pd.json_normalize(response.json(), record_path=record_path)
+                df = df.append(page_n)
+                params.pop()
+            
+    return df
 
 
 def get_recent_games(home_team_id, away_team_id):
