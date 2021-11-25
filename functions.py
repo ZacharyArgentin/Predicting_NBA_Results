@@ -1,5 +1,7 @@
 import pandas as pd
 import requests
+from datetime import date
+from datetime import timedelta
 
 
 def make_request(endpoint, params=None, record_path=None, verbose=False):
@@ -36,12 +38,24 @@ def make_request(endpoint, params=None, record_path=None, verbose=False):
 def get_recent_games(home_team_id, away_team_id):
     """
     Get a list game ids for the 20 most recent games played for each team specified.
-    Returns a tuple of 2 lists. ---> ([home team game ids], [away team game ids])
+
+    ---Params---
+    home_team_id: int
+    away_team_id: int
+
+    ---Returns---
+     a tuple of 2 lists. ---> ([home team game ids], [away team game ids])
     """
+    # Get todays date
+    today = date.today()                                                           # Get today
+    today = f"{today.year}-{today.month}-{today.day}"                              # Convert to format yyyy-mm-dd
+    one_year_ago = date.today() - timedelta(days=365)                              # Get last-year-today
+    one_year_ago = f"{one_year_ago.year}-{one_year_ago.month}-{one_year_ago.day}"  # convert to format yyyy-mm-dd
+
     # get home team recent games
     recent_games_home = pd.DataFrame()
-    res = make_request("games", record_path="data", params={"end_date": "2021-11-09",
-                                                            "start_date": "2020-11-09",
+    res = make_request("games", record_path="data", params={"end_date": today,
+                                                            "start_date": one_year_ago,
                                                             "team_ids[]": [home_team_id],
                                                             "page": 1,
                                                             "per_page": "100"})
