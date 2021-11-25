@@ -103,11 +103,12 @@ def clean_stats(df):
     df["min"] = df["min"].astype(str)
 
     # drop the row if the player didn't play in the game
+    df.reset_index(drop=True, inplace=True)  # The next line of code depends on unique indices!!!!
     played_0min = df[df["min"].eq("0:00") | df["min"].eq("") | df["min"].str.startswith("0")].index
     df.drop(played_0min, axis=0, inplace=True)
 
     # Convert times like "27.0" to "27:0"
-    df["min"] = df["min"].str.replace(".",":")
+    df["min"] = df["min"].str.replace(".",":", regex=False)
 
     # convert times like "27" to "27:00"
     minutes_only_times = df["min"][~df["min"].str.contains(":")].index
@@ -131,7 +132,7 @@ def clean_stats(df):
     times = [":".join(list(item)) for item in list(zip(minutes,seconds))]
 
     df["min"] = times
-    
+
     return df
 
 
