@@ -18,6 +18,8 @@ def make_request(endpoint, params=None, record_path=None, verbose=False):
     # and then complile the results into one dataframe
     n_pages = response.json()["meta"]["total_pages"] 
     if n_pages > 1:
+        # The code is slightly different depending on whether the query paramerters were passed
+        # as a dictionary or as a list of tuples
         if isinstance(params, dict):
             for page_num in range(2, n_pages + 1):
                 params.update({"page": page_num})
