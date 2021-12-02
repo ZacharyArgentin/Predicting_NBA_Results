@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="/" method="POST">
+        <p>Enter Home Team</p>
+        <input type="text" name="homeTeam" id="homeTeam">
+        <br>
+        <p>Enter Away Team</p>
+        <input type="text" name="awayTeam" id="awayTeam">
+        <br>
+        <br>
+        <input type="submit" value="Predict Winner!">
+    </form>
+    <p>Predicted winner: {{winner}}</p>
+    <p>Confidence: {{confidence}}%</p>
+    <br>
+    <p>Valid Inputs</p>
+    <p>{{inputTable}}</p>
+</body>
+</html>

@@ -207,6 +207,8 @@ def get_stats(game_ids_home, game_ids_away):
     The function returns a Numpy array that the model is expecting as input.
     """
     
+
+
     
     def format_params(game_ids):
         """ 
@@ -251,6 +253,7 @@ def get_stats(game_ids_home, game_ids_away):
     model_input = stats.values.reshape(1,-1)
     
     return model_input
+
 
 
 
