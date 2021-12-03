@@ -6,8 +6,10 @@ app = Flask(__name__)
 
 # Load the team name map
 name_map = get_team_code_map()
+
 # get a list of valid inputs to display on the webpage
 input_table = list(name_map.keys())
+
 # Load the trained model
 model = pickle.load(open("model.sav", "rb"))
 

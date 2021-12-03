@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 from datetime import date
 from datetime import timedelta
+import time
 
 
 
@@ -20,16 +21,17 @@ def make_request(endpoint, params=None, record_path=None, verbose=False):
     # and then complile the results into one dataframe
     n_pages = response.json()["meta"]["total_pages"] 
     if n_pages > 1:
+        for page_num in range(2, n_pages + 1):
+            # Make sure not to exceed the 60 request per second limit
+            time.sleep(1)
         # The code is slightly different depending on whether the query paramerters were passed
         # as a dictionary or as a list of tuples
-        if isinstance(params, dict):
-            for page_num in range(2, n_pages + 1):
+            if isinstance(params, dict):
                 params.update({"page": page_num})
                 response = requests.get(root + endpoint, params=params)
                 page_n = pd.json_normalize(response.json(), record_path=record_path)
                 df = df.append(page_n)
-        if isinstance(params, list):
-            for page_num in range(2, n_pages + 1):
+            if isinstance(params, list):
                 params.append(("page", page_num))
                 response = requests.get(root + endpoint, params=params)
                 page_n = pd.json_normalize(response.json(), record_path=record_path)
@@ -104,6 +106,14 @@ def clean_stats(df):
             "player.weight_pounds", "team.abbreviation", "team.city", "team.conference", "team.division", "team.name",
             "player.first_name", "player.last_name", "player.position", "team.full_name", "player.team_id"],
           axis=1, inplace=True)
+    
+    # Some responses have a mysterious "player" column with all null values
+    # It's important to remove this column if it exists, otherwise the next block
+    # of code will drop every single row and will produce errors
+    try: 
+        df.drop("player", axis=1, inplace=True)
+    except KeyError:
+        pass
     
     # drop rows with any null values
     # a null value generally indicates that the player did not play in that game
