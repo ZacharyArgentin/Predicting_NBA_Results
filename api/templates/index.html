@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Predicting NBA Results</title>
 </head>
 <body>
+    <h2>Predicting NBA Results</h2>
+    <p>
+        This app uses machine learning to predict the winner of NBA games.
+        Stats are pulled from <a href=https://www.balldontlie.io target="_blank">balldontlie.io</a> to determine the team's recent form.
+        The machine learning model compares the stats between the 2 teams and then
+        predicts who will win. The model also shows how confident it is in its prediction.
+        The model was trained by looking at stats from over 40,000 NBA games.
+    </p>
+    <p>Note: Each request takes about 10 - 15 seconds to process</p>
     <form action="/" method="POST">
         <p>Enter Home Team</p>
         <input type="text" name="homeTeam" id="homeTeam">
