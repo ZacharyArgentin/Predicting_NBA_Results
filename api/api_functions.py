@@ -275,10 +275,12 @@ def get_team_code_map(df=False):
     # using said dataframe, map team names to team id
     team_code_map = {}
     for row in team_code_df.iterrows():
-        team_code_map.update(dict.fromkeys(row[1].str.lower().values, row[0]))
-        # Make sure "1" maps to 1. i.e. string maps to integer. This is so people can enter the team code
-        # in the text box for convenience and everything still works fine.
-        team_code_map.update({str(row[0]): row[0]})                   
+        # Make sure "1" maps to 1. i.e. string maps to integer. 
+        # This is so people can enter the team code in the 
+        # text box for convenience and everything still works fine.
+        team_code_map.update({str(row[0]): row[0]})
+        # map the rest of the valid inputs to the team id 
+        team_code_map.update(dict.fromkeys(row[1].str.lower().values, row[0]))                  
     if df:
         return team_code_df
     else:
