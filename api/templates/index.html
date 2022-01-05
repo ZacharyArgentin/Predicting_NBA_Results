@@ -1,43 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
     <title>Predicting NBA Results</title>
 </head>
+
 <body>
-    <h2>Predicting NBA Results</h2>
-    <p>
-        This app uses machine learning to predict the winner of NBA games.
-        Stats are pulled from <a href=https://www.balldontlie.io target="_blank">balldontlie.io</a> to determine the team's recent form.
-        The machine learning model compares the stats between the 2 teams and then
-        predicts who will win. The model also shows how confident it is in its prediction.
-        The model was trained by looking at stats from over 40,000 NBA games.
-    </p>
-    <p><b>Notes:</b></p>
-    <ul>
-        <li>Each request takes about 10 - 15 seconds to process</li>
-        <li>See the bottom of the page for a list of valid inputs</li>
-    </ul>
-    <form action="/" method="POST">
-        <p>Enter Home Team</p>
-        <input type="text" name="homeTeam" id="homeTeam">
-        <br>
-        <p>Enter Away Team</p>
-        <input type="text" name="awayTeam" id="awayTeam">
-        <br>
-        <br>
-        <input type="submit" value="Predict Winner!">
-    </form>
-    <p>Predicted winner: {{winner}}</p>
-    <p>Confidence: {{confidence}}%</p>
-    <br>
-    <h3> See the Github Repository here: <a href=https://github.com/ZacharyArgentin/Predicting_NBA_Results target="_blank">Predicting NBA Results</a></h3>
-    <br>
-    <p>Valid Inputs</p>
-    {% for val in inputTable %}
-    <p>{{val}}</p>
-    {% endfor %}
+    <div class="container">
+        <header>
+        <h1>Predicting NBA Results</h1>
+        </header>
+
+        <section id="app">
+            <form action="/" method="POST">
+                <label for="homeTeam">Enter Home Team</label>
+                <input class="team-input" type="text" name="homeTeam" id="homeTeam" placeholder="e.g. Toronto; Raptors; Toronto Raptors; tor">
+                <label for="awayTeam">Enter Away Team</label>
+                <input class="team-input" type="text" name="awayTeam" id="awayTeam" placeholder="e.g. Brooklyn; Nets; Brooklyn Nets; bkn">
+                <input class="btn" type="submit" value="Predict Winner!">
+            </form>
+            <div id="results">
+                <p>Predicted winner: {{winner}}</p>
+                <p>Confidence: {{confidence}}%</p>
+            </div>
+            
+        </section>
+
+        <section id="info">
+            <div id="notes">
+                <h2>Notes:</h2>
+                <ul>
+                    <li>Each request takes about 10 - 15 seconds to process</li>
+                    <li>See the bottom of the page for a comprehensive list of valid inputs</li>
+                </ul>
+            </div>
+            
+            <p id="description">
+                This app uses machine learning to predict the winner of NBA games.
+                Stats are pulled from <a href=https://www.balldontlie.io target="_blank">balldontlie.io</a> to determine the team's recent form.
+                The machine learning model compares the stats between the 2 teams and then
+                predicts who will win. The model also shows how confident it is in its prediction.
+                The model was trained by looking at stats from over 40,000 NBA games.
+            </p>
+            
+     
+            <h3><a id="github" href=https://github.com/ZacharyArgentin/Predicting_NBA_Results target="_blank">Check out the Github Repo</a></h3>
+            <p>Valid Inputs</p>
+            {% for val in inputTable %}
+            <p>{{val}}</p>
+            {% endfor %}
+        </section>
+        
+    </div>
 </body>
 </html>

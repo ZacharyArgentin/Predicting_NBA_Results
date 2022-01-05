@@ -1,0 +1,98 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: orange;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    background-color: #f4f4f4;
+    max-width: 800px;
+    margin: auto;
+    padding: 50px 30px;
+}
+
+h1 {
+    text-align: center;
+    color:red;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+}
+
+/* App Section */
+
+#app {
+    max-width: 400px;
+    margin: auto;
+    margin-bottom: 30px;
+    text-align: left;
+    line-height: 1.5em;
+    font-size: 1.2em;
+}
+
+#app .team-input {
+    width: 100%;
+    padding: 3px;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+#app .team-input:last-child {
+    margin-bottom: 0px;
+}
+
+#app #results {
+    padding: 10px 0px;
+}
+
+.btn {
+    display: block;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    padding: 10px 15px;
+    margin: 20px auto;
+    color: red;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #aaa;
+}
+
+.btn:active {
+    background-color: #aaa;
+}
+
+/* Info Section */
+
+#info #notes ul {
+    padding-left: 40px;
+}
+
+#info #notes ul li {
+    font-size: 1.2em;
+    line-height: 2em;
+}
+
+#info #description {
+    margin: 20px 0px;
+}
+
+#info #github {
+    display: block;
+    max-width: 250px;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px 15px;
+    margin: 50px auto;
+    border-radius: 10px;
+    background-color: #222;
+    color: #fff;
+    font-size: 16px;
+}
