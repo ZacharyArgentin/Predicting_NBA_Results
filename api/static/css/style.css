@@ -59,6 +59,7 @@ h1 {
     margin: 20px auto;
     color: red;
     cursor: pointer;
+    -webkit-appearance: none;
 }
 
 .btn:hover {
@@ -92,7 +93,16 @@ h1 {
     padding: 10px 15px;
     margin: 50px auto;
     border-radius: 10px;
-    background-color: #222;
+    background-color: #000;
     color: #fff;
     font-size: 16px;
+}
+
+#info #github:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+#info #github:active {
+    background-color: #333;
 }
