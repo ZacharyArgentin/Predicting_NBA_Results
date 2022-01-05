@@ -58,6 +58,7 @@ h1 {
     padding: 10px 15px;
     margin: 20px auto;
     color: red;
+    background-color: #bbb;
     cursor: pointer;
     /* Fixing rendering issue with ios devices */
     -webkit-appearance: none;
