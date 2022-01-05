@@ -59,7 +59,10 @@ h1 {
     margin: 20px auto;
     color: red;
     cursor: pointer;
+    /* Fixing rendering issue with ios devices */
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .btn:hover {
