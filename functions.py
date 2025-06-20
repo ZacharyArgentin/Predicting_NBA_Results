@@ -3,42 +3,52 @@ import requests
 from datetime import date
 from datetime import timedelta
 import time
+import os
 
 
 
 
-def make_request(endpoint, params=None, record_path=None, verbose=False):
-    root = "https://www.balldontlie.io/api/v1/"
-    response = requests.get(root + endpoint, params=params)
-    if response.status_code != 200:
-        print(response.status_code)
-        return response
-    if verbose: 
-        print("Success!")  
-    df = pd.json_normalize(response.json(), record_path=record_path)
-   
-    # If the request ends up being a multi page request, get all the pages
-    # and then complile the results into one dataframe
-    n_pages = response.json()["meta"]["total_pages"] 
-    if n_pages > 1:
-        for page_num in range(2, n_pages + 1):
-            # Make sure not to exceed the 60 request per second limit
-            time.sleep(1)
-        # The code is slightly different depending on whether the query paramerters were passed
-        # as a dictionary or as a list of tuples
-            if isinstance(params, dict):
-                params.update({"page": page_num})
-                response = requests.get(root + endpoint, params=params)
-                page_n = pd.json_normalize(response.json(), record_path=record_path)
-                df = df.append(page_n)
-            if isinstance(params, list):
-                params.append(("page", page_num))
-                response = requests.get(root + endpoint, params=params)
-                page_n = pd.json_normalize(response.json(), record_path=record_path)
-                df = df.append(page_n)
-                params.pop()
-            
-    return df
+def make_request(endpoint, next_cursor=0, params=None, verbose=False):
+    root = "https://api.balldontlie.io/v1/"
+    api_key = os.environ["BALLDONTLIE_API_KEY"]
+    headers = {"Authorization": api_key}
+    if params is None: params = {}
+    # This API uses cursor based pagination.
+    # The cursor should be initialized to 0 so that the first requests will fetch the first page.
+    # If there is more than one page to the request, the response will include a "next_cursor" attribute in 
+    # the meta data JSON.
+    # In the next request, set the cursor parameter to this number to get the next page
+    if verbose: print("Starting Loop")
+    df_list = []
+    request_count = 0
+    while next_cursor is not None:
+        if verbose: print("Making request... ")
+        response = requests.get(root + endpoint, headers=headers, params=params)
+        request_count += 1
+        if response.status_code != 200:
+            print(f"Request failed: {response.status_code}")
+            break
+        if verbose: print(f"Request Succeeded - {response.status_code}" )
+        res = response.json()
+        data = res["data"]
+        if data:
+            df_list.append(pd.DataFrame(data))
+        meta_data = res.get("meta", None)
+        if meta_data is None:  # Enpoint doesn't support pagination, no need to loop
+            break
+        next_cursor = meta_data.get("next_cursor")
+        if next_cursor is None:  # Last page reached, no need to loop
+            break
+        params.update({"cursor": next_cursor})
+        # Max 60 requests per minute, sleep if necessary
+        if request_count % 60 == 0:
+            print("Max 60 requests per minute, sleeping for 60 seconds..")
+            time.sleep(60)
+    # Concatenate all collected data into one DataFrame
+    if df_list:
+        return pd.concat(df_list)
+    else:
+        return pd.DataFrame()
 
 
 
@@ -60,10 +70,10 @@ def get_recent_games(home_team_id, away_team_id):
     away_team_id = int(away_team_id)
 
     # Get todays date
-    today = date.today()                                                           # Get today
-    today = f"{today.year}-{today.month}-{today.day}"                              # Convert to format yyyy-mm-dd
-    one_year_ago = date.today() - timedelta(days=365)                              # Get last-year-today
-    one_year_ago = f"{one_year_ago.year}-{one_year_ago.month}-{one_year_ago.day}"  # convert to format yyyy-mm-dd
+    today = date.today()                               # Get today
+    today = today.strftime("%Y-%m-%d")                 # Convert to format yyyy-mm-dd
+    one_year_ago = date.today() - timedelta(days=365)  # Get last-year-today
+    one_year_ago = one_year_ago.strftime("%Y-%m-%d")   # convert to format yyyy-mm-dd
 
     # get home team recent games
     recent_games_home = pd.DataFrame()
@@ -75,7 +85,7 @@ def get_recent_games(home_team_id, away_team_id):
     res = res.sort_values("date", ascending=False)
     res = res[res["home_team.id"].eq(home_team_id)]
 
-    recent_games_home = recent_games_home.append(res)
+    recent_games_home = pd.concat([recent_games_home, res])
     recent_games_home = recent_games_home.head(20)
     game_ids_home = list(recent_games_home["id"].values)
 
@@ -90,7 +100,7 @@ def get_recent_games(home_team_id, away_team_id):
     res = res.sort_values("date", ascending=False)
     res = res[res["visitor_team.id"].eq(away_team_id)]
 
-    recent_games_away = recent_games_away.append(res)
+    recent_games_away = pd.concat([recent_games_away, res])
     recent_games_away = recent_games_away.head(20)
     game_ids_away = list(recent_games_away["id"].values)
 
@@ -102,8 +112,8 @@ def get_recent_games(home_team_id, away_team_id):
 
 def clean_stats(df):
     # drop columns with superfluous information
-    df.drop(["id", "game.period", "game.postseason", "game.status", "game.time", "player.height_feet", "player.height_inches",
-            "player.weight_pounds", "team.abbreviation", "team.city", "team.conference", "team.division", "team.name",
+    df.drop(["id", "game.period", "game.postseason", "game.status", "game.time", "player.height",
+            "player.weight", "team.abbreviation", "team.city", "team.conference", "team.division", "team.name",
             "player.first_name", "player.last_name", "player.position", "team.full_name", "player.team_id"],
           axis=1, inplace=True)
     
@@ -218,31 +228,36 @@ def get_stats(game_ids_home, game_ids_away):
     """
     
     
-    def format_params(game_ids):
-        """ 
-        Format query paramaters in a format the balldontlie API accepts
-        e.g. ?game_ids[]=345686&game_ids[]=234356&gameids[]=3456356...
-        """
-        params = "game_ids[] " * len(game_ids)
-        params = list(zip(params.split(" "), game_ids))
-        params.append(("per_page", 100))
-        return params
+    # def format_params(game_ids):
+    #     """ 
+    #     Format query paramaters in a format the balldontlie API accepts
+    #     e.g. ?game_ids[]=345686&game_ids[]=234356&gameids[]=3456356...
+    #     """
+    #     params = "game_ids[] " * len(game_ids)
+    #     params = list(zip(params.split(" "), game_ids))
+    #     params.append(("per_page", 100))
+    #     return params
     
+
     stats_cols = ["ast","blk","dreb","fg3_pct","fg3a","fg3m","fg_pct","fga","fgm","ft_pct","fta","ftm","oreb",
               "pf","pts","reb","stl","turnover"]
     
     # Get pandas Series of home team stats
-    params_home = format_params(game_ids_home)                                 # Get param list
-    stats_home = make_request("stats", record_path="data", params=params_home) # Make request with said param list
-    stats_home = clean_stats(stats_home)                                       # clean the data
+    stats_home = make_request("stats", record_path="data", params={
+            "game_ids": game_ids_home,
+            "per_page": 100
+        })
+    stats_home = clean_stats(stats_home)                                       
     stats_home = stats_home[stats_home["team.id"].eq(stats_home["game.home_team_id"])]  # Filter for stats of players that played for the home team
     stats_home = aggregate_stats(stats_home)                                   # aggregate individual player stats into team stats
     stats_home = stats_home[stats_cols]                                        # Drop the columns that aren't basketball stats
     stats_home = stats_home.mean()                                             # average the stats
     
     # Get pandas Series of away team stats
-    params_away = format_params(game_ids_away)
-    stats_away = make_request("stats", record_path="data", params=params_away)
+    stats_away = make_request("stats", record_path="data", params={
+            "game_ids": game_ids_away,
+            "per_page": 100
+        })
     stats_away = clean_stats(stats_away)
     stats_away = stats_away[stats_away["team.id"].eq(stats_away["game.visitor_team_id"])]
     stats_away = aggregate_stats(stats_away)
@@ -257,7 +272,7 @@ def get_stats(game_ids_home, game_ids_away):
     stats_away.index = "away_" + stats_away.index
     stats_diff.index = "diff_" + stats_diff.index
     
-    stats = stats_home.append([stats_away, stats_diff])
+    stats = pd.concat([stats_home, stats_away, stats_diff])
     model_input = stats.values.reshape(1,-1)
     
     return model_input
