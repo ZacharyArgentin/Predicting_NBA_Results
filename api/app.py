@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import os
 import pickle
 from api_functions import *
 
@@ -14,14 +15,19 @@ input_table = list(name_map.keys())
 # the list of strings so that there is 1 string per team instead
 # of 1 string per input
 # e.g
-# ["atlanta", "hawks", "boston", "celtics"] --> ["atlanta, hawks", "boston celtics"] 
+# ["atlanta", "hawks", "boston", "celtics"] --> ["atlanta, hawks", "boston celtics"]
 for i in range(len(input_table), 0, -5):
     input_table.insert(i, "\n")           # add a newline character where we want to split
 input_table = " , ".join(input_table)       # join to one big long string
 input_table = input_table.split(", \n ,")     # split where we added the newlines
 
+
 # Load the trained model
-model = pickle.load(open("model.sav", "rb"))
+# The path to the model depends where the app is being run (locally vs web server)
+# so build the model path dynamically
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Gets the folder where app.py is
+model_path = os.path.join(BASE_DIR, "model.sav")       # Joins it to "model.sav"
+model = pickle.load(open(model_path, "rb"))
 
 # defining what happens on the home page
 @app.route("/", methods=["POST", "GET"])
@@ -37,7 +43,7 @@ def index():
         # Convert the input to the appropriate team id
         home_id = name_map[home_team_name]
         away_id = name_map[away_team_name]
-        
+
         # Make the appropriate balldontlie api calls
         home_game_ids, away_game_ids = get_recent_games(home_id, away_id)
         model_input = get_stats(home_game_ids, away_game_ids)
@@ -57,7 +63,7 @@ def index():
         # Display the home page with the prediction
         return render_template("index.html", winner=winner, confidence=confidence, inputTable=input_table)
     else:
-        # Display the home page 
+        # Display the home page
         # (runs only when the website is first loaded)
         return render_template("index.html", inputTable=input_table)
 
