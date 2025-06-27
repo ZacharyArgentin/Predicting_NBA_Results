@@ -18,9 +18,17 @@
         <section id="app">
             <form action="/" method="POST">
                 <label for="homeTeam">Enter Home Team</label>
-                <input class="team-input" type="text" name="homeTeam" id="homeTeam" placeholder="e.g. Toronto; Raptors; Toronto Raptors; tor">
+                <select name="homeTeam" id="homeTeam" class="team-input">
+                    {% for team in teams %}
+                    <option value="{{team.id}}">{{team.full_name}}</option>
+                    {% endfor %}
+                </select>
                 <label for="awayTeam">Enter Away Team</label>
-                <input class="team-input" type="text" name="awayTeam" id="awayTeam" placeholder="e.g. Brooklyn; Nets; Brooklyn Nets; bkn">
+                <select name="awayTeam" id="awayTeam" class="team-input">
+                    {% for team in teams %}
+                    <option value="{{team.id}}">{{team.full_name}}</option>
+                    {% endfor %}
+                </select>
                 <input class="btn" type="submit" value="Predict Winner!">
             </form>
             <div id="results">
@@ -35,7 +43,6 @@
                 <h2>Notes:</h2>
                 <ul>
                     <li>Each request takes about 10 - 15 seconds to process</li>
-                    <li>See the bottom of the page for a comprehensive list of valid inputs</li>
                 </ul>
             </div>
             
@@ -49,10 +56,6 @@
             
      
             <h3><a id="github" href=https://github.com/ZacharyArgentin/Predicting_NBA_Results target="_blank">Check out the Github Repo</a></h3>
-            <p>Valid Inputs</p>
-            {% for val in inputTable %}
-            <p>{{val}}</p>
-            {% endfor %}
         </section>
         
     </div>
