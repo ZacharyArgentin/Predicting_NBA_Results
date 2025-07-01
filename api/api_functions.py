@@ -75,11 +75,11 @@ def get_recent_games(home_team_id, away_team_id):
     one_year_ago = date.today() - timedelta(days=365)  # Get last-year-today
     one_year_ago = one_year_ago.strftime("%Y-%m-%d")   # convert to format yyyy-mm-dd
 
-    # get home team recent games
+    # get the home team's 20 most recent home games
     recent_games_home = pd.DataFrame()
     res = make_request("games", params={"end_date": today,
                                         "start_date": one_year_ago,
-                                        "team_ids[]": [home_team_id, 0],  # No idea how requests is bulding the query string, but the api is throwing a "invalid value" error when there's only one value, so need to pass a dummy value of 0 to get it to work
+                                        "team_ids[]": [home_team_id, 0],  # No idea how the requests library is bulding the query string, but the api is throwing an "invalid value" error when there's only one value, so need to pass a dummy value of 0 to get it to work
                                         "per_page": "100"})
     res = res.sort_values("date", ascending=False)
     res = res[res["home_team.id"].eq(home_team_id)]
@@ -88,11 +88,11 @@ def get_recent_games(home_team_id, away_team_id):
     recent_games_home = recent_games_home.head(20)
     game_ids_home = list(recent_games_home["id"].values)
 
-    # get away team recent games
+    # get the away team's 20 most recent away games
     recent_games_away = pd.DataFrame()
-    res = make_request("games", params={"end_date": "2021-11-09",
-                                        "start_date": "2020-11-09",
-                                        "team_ids[]": [away_team_id, 0],  # No idea how requests is bulding the query string, but the api is throwing a "invalid value" error when there's only one value, so need to pass a dummy value of 0 to get it to work
+    res = make_request("games", params={"end_date": today,
+                                        "start_date": one_year_ago,
+                                        "team_ids[]": [away_team_id, 0],  # No idea how the requests library is bulding the query string, but the api is throwing an "invalid value" error when there's only one value, so need to pass a dummy value of 0 to get it to work
                                         "per_page": "100"})
 
     res = res.sort_values("date", ascending=False)
