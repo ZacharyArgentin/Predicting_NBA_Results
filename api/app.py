@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import os
 import pickle
-from api_functions import *
+from functions import *
 
 app = Flask(__name__)
 
