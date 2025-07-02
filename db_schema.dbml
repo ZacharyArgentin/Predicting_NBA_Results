@@ -1,0 +1,74 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Project predicting_nba_results {
+  database_type: 'sqlite'
+}
+
+Table team {
+  id int [primary key]
+  conference text
+  division text
+  city text
+  name text
+  full_name text
+  abbreviation text
+}
+
+Table game {
+  id int [primary key]
+  game_date text
+  timestamp text 
+  season int
+  status text
+  period int
+  time text
+  postseason int
+  home_team_score int
+  visitor_team_score int
+  home_team_id int [ref: > team.id]
+  away_team_id int [ref: > team.id]
+}
+
+Table player {
+  id int [primary key]
+  first_name text
+  last_name text
+  position text
+  height text
+  weight text
+  jersey_number text
+  college text
+  country text
+  draft_year int
+  draft_round int
+  draft_number int
+}
+
+Table game_stats {
+  id int [primary key]
+  min text
+  fgm int
+  fga int
+  fg_pct real
+  fg3m int
+  fg3a int
+  fg3_pct real
+  ftm int
+  fta int
+  ft_pct real
+  oreb int
+  dreb int
+  reb int
+  ast int
+  stl int
+  blk int
+  turnover int
+  pf int
+  pts int
+  player_id int [ref: > player.id]
+  team_id int [ref: > team.id]
+  game_id int [ref: > game.id]
+}
+
+
