@@ -1,5 +1,5 @@
 # Ignore Mac OS directory metadata
-*.DS_Store
+.DS_Store
 
 # Ignore python bytecode
 __pycache__/
